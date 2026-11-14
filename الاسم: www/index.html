@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>سِجل الصروح العراقية (1921 - 2026)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root{--lapis:#09213f;--lapis2:#133b6e;--gold:#c89b3c;--gold2:#edd28b;--clay:#f4ebd4;--tablet:#fffcf3;--brick:#8b3a2b;--ink:#1c1917;--muted:#685b48;--border:#d7c59e;--ok:#1b6b3a;--prog:#0e5a8a}
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
+    body{margin:0;background:var(--clay);background-image:radial-gradient(rgba(139,58,43,.07) 1px,transparent 1px),linear-gradient(180deg,#f6eed9 0%,#eadcb9 100%);background-size:18px 18px,100% 100%;color:var(--ink)}
+    header{background:linear-gradient(160deg,#06162b 0%,#09213f 55%,#143d70 100%);color:var(--tablet);position:sticky;top:0;z-index:900;border-bottom:4px solid var(--gold);box-shadow:0 5px 16px rgba(6,22,43,.32);overflow:hidden}
+    .ishtar-frieze{height:11px;background:repeating-linear-gradient(90deg,var(--gold) 0 10px,#06162b 10px 15px,var(--brick) 15px 25px,#06162b 25px 30px)}
+    .header-inner{padding:11px 14px;position:relative}
+    .ziggurat-bg{position:absolute;left:6px;bottom:0;width:118px;opacity:.16;pointer-events:none}
+    .header-top{display:flex;justify-content:space-between;align-items:center;gap:8px;position:relative}
+    .brand{display:flex;align-items:center;gap:9px}
+    .rosette-icon{width:36px;height:36px;flex-shrink:0}
+    header h1{margin:0;font-size:15.5px;font-weight:800;color:var(--gold2)}
+    header p{margin:2px 0 0;font-size:10.5px;color:#dbeafe}
+    .heritage-btn{background:rgba(200,155,60,.2);border:1.5px solid var(--gold);color:var(--gold2);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer}
+    #govPortal{padding:14px;max-width:640px;margin:0 auto}
+    .portal-hero{background:linear-gradient(145deg,#09213f 0%,#164175 100%);color:var(--tablet);border-radius:30px 30px 14px 14px;padding:18px 16px;border:2.5px solid var(--gold);margin-bottom:16px;text-align:center;box-shadow:0 6px 18px rgba(9,33,63,.25)}
+    .portal-hero::before{content:"❖ ✦ ❖";display:block;color:var(--gold);font-size:12px;margin-bottom:4px;letter-spacing:6px}
+    .portal-hero h2{margin:0 0 6px;font-size:17px;color:var(--gold2)}
+    .portal-hero p{margin:0 0 13px;font-size:12px;color:#dbeafe;line-height:1.6}
+    .all-iraq-btn{width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--gold2);background:linear-gradient(135deg,#c89b3c 0%,#9e731b 100%);color:#06162b;font-size:14px;font-weight:800;cursor:pointer}
+    .gov-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+    .gov-card{background:linear-gradient(180deg,#fffdf6 0%,#f7ecd1 100%);border:2px solid var(--gold);border-radius:26px 26px 8px 8px;overflow:hidden;cursor:pointer;box-shadow:0 4px 10px rgba(72,52,25,.12);text-align:center}
+    .gov-card:active{transform:scale(.98)}
+    .gov-arch{background:linear-gradient(135deg,#09213f 0%,#164175 100%);color:var(--gold2);padding:7px 6px 5px;border-bottom:2.5px solid var(--gold);font-size:10.5px;font-weight:800}
+    .gov-body{padding:10px 8px 11px}
+    .gov-name{font-size:15px;font-weight:800;color:var(--lapis);margin-bottom:4px}
+    .gov-count{font-size:11px;color:var(--brick);font-weight:700;background:#f2e2c4;display:inline-block;padding:2px 8px;border-radius:10px;border:1px solid var(--border)}
+    #mainApp{display:none;padding-bottom:74px}
+    .active-gov-bar{background:#efe2c2;padding:8px 14px;border-bottom:2px solid var(--gold);display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:800;color:var(--lapis)}
+    .change-gov-btn{background:var(--lapis);color:var(--gold2);border:1.5px solid var(--gold);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer}
+    .search-wrap{padding:10px 14px 7px;background:var(--tablet);border-bottom:1px solid var(--border);display:flex;gap:8px}
+    .search-input,.gov-select{padding:9px 11px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;background:#faf3e0;color:var(--ink);outline:none}
+    .search-input{flex:1}
+    .gov-select{max-width:124px;font-size:12px}
+    .filters-row{display:flex;gap:6px;overflow-x:auto;padding:7px 14px;background:var(--tablet);border-bottom:1px solid var(--border);scrollbar-width:none}
+    .filters-row::-webkit-scrollbar{display:none}
+    .chip{white-space:nowrap;padding:5px 11px;border-radius:8px;font-size:11.5px;border:1.5px solid var(--border);background:#f5ebd2;color:var(--ink);cursor:pointer}
+    .chip.active{background:var(--lapis);color:var(--gold2);border-color:var(--gold);font-weight:700}
+    .container{padding:11px 14px}
+    .stats-bar{font-size:11.5px;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;font-weight:700}
+    .card{background:linear-gradient(180deg,#fffdf6 0%,#f8eed4 100%);border-radius:16px 16px 6px 6px;padding:13px;margin-bottom:12px;border:2px solid var(--border);border-top:4px solid var(--lapis);border-right:5px solid var(--gold);box-shadow:0 4px 12px rgba(72,52,25,.1);position:relative;cursor:pointer}
+    .card::after{content:"✵";position:absolute;left:10px;bottom:6px;color:rgba(200,155,60,.35);font-size:16px}
+    .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+    .flag-box{width:50px;height:32px;border-radius:4px;overflow:hidden;border:1.5px solid var(--gold);flex-shrink:0}
+    .card-title{font-size:15px;font-weight:800;margin:0 0 4px;color:var(--lapis)}
+    .card-sub{font-size:11.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+    .loc-line{font-size:11px;color:var(--brick);font-weight:700;margin-top:4px}
+    .badge{padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:700}
+    .b-done{background:#e3f3e8;color:var(--ok);border:1px solid #b5dfc2}
+    .b-prog{background:#e1eff8;color:var(--prog);border:1px solid #b8d8ee}
+    .card-meta{margin-top:9px;padding-top:9px;border-top:1px dashed var(--gold);display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11.5px}
+    .meta-item strong{color:var(--brick);font-weight:700;display:block;font-size:10px}
+    #mapView{display:none;height:calc(100vh - 135px);width:100%}
+    #map{height:100%;width:100%}
+    #erasView{display:none;padding:14px}
+    .era-card,.info-box{background:var(--tablet);border-radius:14px;padding:13px;margin-bottom:10px;border:1.5px solid var(--border)}
+    .era-card{display:flex;gap:12px;align-items:center;border-right:5px solid var(--gold)}
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(6,22,43,.7);z-index:1200;align-items:flex-end;justify-content:center}
+    .modal-bg.open{display:flex}
+    .modal{background:var(--tablet);width:100%;max-width:600px;max-height:90vh;overflow-y:auto;border-radius:26px 26px 0 0;border-top:4px solid var(--gold);padding:18px 16px 28px}
+    .modal-close{float:left;background:#efe4c8;border:1px solid var(--gold);border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer}
+    .project-banner{width:100%;height:115px;border-radius:22px 22px 8px 8px;margin:10px 0;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(135deg,#09213f 0%,#183d68 60%,#8b3a2b 100%);color:var(--gold2)}
+    .loc-box{background:#f9ece8;border:1.5px solid #d99b8c;border-radius:12px;padding:11px;margin-top:10px;font-size:12.5px;line-height:1.65}
+    .loc-box h4{margin:0 0 5px;color:var(--brick);font-size:13px}
+    .detail-grid{display:grid;gap:8px;margin-top:10px}
+    .detail-row{background:#faf2df;padding:9px 12px;border-radius:10px;border:1px solid var(--border);font-size:13px}
+    .detail-row span{display:block;font-size:11px;color:var(--brick);font-weight:700;margin-bottom:2px}
+    .specs-box{background:#eef4fb;border:1.5px solid #93b4dc;border-radius:12px;padding:12px;margin-top:10px;font-size:12.5px;line-height:1.65}
+    .specs-box h4{margin:0 0 6px;color:var(--lapis);font-size:13px}
+    .cost-box{background:#fdf3d7;border:1.5px solid var(--gold);border-radius:12px;padding:12px;margin-top:10px;font-size:12.5px;line-height:1.65}
+    .cost-box h4{margin:0 0 6px;color:#6e4a0c;font-size:13px}
+    .action-btn{display:block;width:100%;margin-top:12px;padding:11px;background:linear-gradient(135deg,var(--lapis) 0%,var(--lapis2) 100%);color:var(--gold2);border:1.5px solid var(--gold);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:64px;background:var(--lapis);border-top:3px solid var(--gold);display:grid;grid-template-columns:repeat(3,1fr);z-index:950}
+    .nav-btn{border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;color:#b7c8df;cursor:pointer;gap:3px}
+    .nav-btn.active{color:var(--gold2);font-weight:800;background:rgba(200,155,60,.14)}
+    .nav-icon{font-size:18px}
+  </style>
+</head>
+<body>
+<header>
+  <div class="ishtar-frieze"></div>
+  <div class="header-inner">
+    <svg class="ziggurat-bg" viewBox="0 0 200 90"><rect x="10" y="65" width="180" height="25" fill="#edd28b"/><rect x="35" y="45" width="130" height="20" fill="#edd28b"/><rect x="60" y="27" width="80" height="18" fill="#edd28b"/><rect x="82" y="10" width="36" height="17" fill="#edd28b"/></svg>
+    <div class="header-top">
+      <div class="brand">
+        <svg class="rosette-icon" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#06162b" stroke="#c89b3c" stroke-width="4"/><g fill="#edd28b"><ellipse cx="50" cy="22" rx="7" ry="18"/><ellipse cx="50" cy="78" rx="7" ry="18"/><ellipse cx="22" cy="50" rx="18" ry="7"/><ellipse cx="78" cy="50" rx="18" ry="7"/><ellipse cx="30" cy="30" rx="7" ry="16" transform="rotate(-45 30 30)"/><ellipse cx="70" cy="70" rx="7" ry="16" transform="rotate(-45 70 70)"/><ellipse cx="70" cy="30" rx="7" ry="16" transform="rotate(45 70 30)"/><ellipse cx="30" cy="70" rx="7" ry="16" transform="rotate(45 30 70)"/></g><circle cx="50" cy="50" r="10" fill="#8b3a2b" stroke="#c89b3c" stroke-width="3"/></svg>
+        <div><h1>سِجل الصروح العراقية</h1><p>موسوعة المشاريع الحكومية من الملكية إلى 2026</p></div>
+      </div>
+      <button class="heritage-btn" onclick="syncAllData()">🔄 تحديث</button>
+    </div>
+  </div>
+</header>
+
+<section id="govPortal">
+  <div class="portal-hero">
+    <h2>بوابة محافظات العراق الـ 18</h2>
+    <p>اختر المحافظة لاستعراض مشاريعها الحكومية الموثقة (المصانع، الجسور والأنفاق، الري، النقل، الاتصالات، والمجاميع).</p>
+    <button class="all-iraq-btn" onclick="enterGov('all')">🇮🇶 عرض جميع محافظات العراق (<span id="totalAllBadge">0</span> صرحاً)</button>
+  </div>
+  <div class="gov-grid" id="govGrid"></div>
+</section>
+
+<div id="mainApp">
+  <div class="active-gov-bar">
+    <span id="activeGovTitle">📍 محافظة: الكل</span>
+    <button class="change-gov-btn" onclick="backToPortal()">🏛️ بوابة المحافظات</button>
+  </div>
+  <div id="listView">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" class="search-input" placeholder="ابحث بالحي، القضاء، الجسر، النفق، المصنع، الاتصالات..." oninput="renderProjects()" />
+      <select id="govSelect" class="gov-select" onchange="renderProjects()"><option value="all">كل المحافظات</option></select>
+    </div>
+    <div class="filters-row" id="eraFilters">
+      <button class="chip active" onclick="setEra('all',this)">كل الحقب</button>
+      <button class="chip" onclick="setEra('monarchy',this)">الملكي (1921-1958)</button>
+      <button class="chip" onclick="setEra('rep1',this)">الجمهوري (1958-1968)</button>
+      <button class="chip" onclick="setEra('rep2',this)">حقبة (1968-2003)</button>
+      <button class="chip" onclick="setEra('modern',this)">2003 - 2026</button>
+    </div>
+    <div class="filters-row" id="sectorFilters">
+      <button class="chip active" onclick="setSector('all',this)">كل القطاعات</button>
+      <button class="chip" onclick="setSector('جسور وأنفاق وطرق',this)">جسور وأنفاق وطرق</button>
+      <button class="chip" onclick="setSector('نقل ومطارات وموانئ',this)">نقل ومطارات وموانئ</button>
+      <button class="chip" onclick="setSector('السكك والقطارات',this)">السكك والقطارات</button>
+      <button class="chip" onclick="setSector('الري والسدود والقنوات',this)">الري والسدود والقنوات</button>
+      <button class="chip" onclick="setSector('المصانع والمجاميع',this)">المصانع والمجاميع</button>
+      <button class="chip" onclick="setSector('التصنيع العسكري',this)">التصنيع العسكري</button>
+      <button class="chip" onclick="setSector('الاتصالات والتقنية',this)">الاتصالات والتقنية</button>
+      <button class="chip" onclick="setSector('النفط والطاقة',this)">النفط والطاقة</button>
+      <button class="chip" onclick="setSector('الملاعب والرياضة',this)">الملاعب والرياضة</button>
+      <button class="chip" onclick="setSector('الصحة والجامعات والإسكان',this)">الصحة والجامعات والإسكان</button>
+    </div>
+    <div class="container">
+      <div class="stats-bar"><span id="countLabel">عرض 0 صرح</span><span>سعر الصرف: 1,520 د.ع/$</span></div>
+      <div id="projectsList"></div>
+    </div>
+  </div>
+  <div id="mapView"><div id="map"></div></div>
+  <div id="erasView"><h3 style="margin-top:0;color:var(--lapis)">🇮🇶 الرايات العراقية عبر التاريخ</h3><div id="erasList"></div></div>
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab('list',this)"><span class="nav-icon">🏛️</span><span>الصروح</span></button>
+    <button class="nav-btn" onclick="switchTab('map',this)"><span class="nav-icon">🗺️</span><span>أرض السواد</span></button>
+    <button class="nav-btn" onclick="switchTab('eras',this)"><span class="nav-icon">🇮🇶</span><span>الرايات</span></button>
+  </nav>
+</div>
+
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)"><div class="modal" id="modalContent"></div></div>
+
+<script>
+const RATE=1520, DB_KEY="iraq_app_v11";
+const DATA_BATCHES=["./data/p1.json","./data/p2.json","./data/p3.json","./data/p4.json","./data/p5.json","./data/p6.json"];
+const GOVS=[
+  ["بغداد","بوابة دار السلام"],["البصرة","بوابة الخليج"],["نينوى","بوابة نينوى الآشورية"],
+  ["الأنبار","بوابة الفرات الغربية"],["صلاح الدين","بوابة آشور وسامراء"],["ديالى","بوابة إشنونا"],
+  ["بابل","بوابة عشتار البابلية"],["كربلاء","بوابة الفرات"],["النجف","بوابة الحيرة والكوفة"],
+  ["الديوانية","بوابة نفر السومرية"],["واسط","بوابة واسط"],["ميسان","بوابة الأهوار"],
+  ["ذي قار","بوابة زقورة أور"],["المثنى","بوابة أوروك السومرية"],["كركوك","بوابة أرابخا"],
+  ["أربيل","بوابة قلعة أربيل"],["السليمانية","بوابة جرمو"],["دهوك","بوابة سنحاريب"]
+];
+const SECTORS=["جسور وأنفاق وطرق","نقل ومطارات وموانئ","السكك والقطارات","الري والسدود والقنوات","المصانع والمجاميع","التصنيع العسكري","الاتصالات والتقنية","النفط والطاقة","الملاعب والرياضة","الصحة والجامعات والإسكان"];
+const PARENTS=["مجلس الإعمار العراقي","وزارة الإعمار والإسكان","وزارة النقل / الموانئ والطيران","الشركة العامة لسكك الحديد","وزارة الموارد المائية","وزارة الصناعة والمعادن","هيئة التصنيع العسكري / الحربي","وزارة الاتصالات","وزارة النفط / الكهرباء","الشباب والرياضة / الصحة / التعليم / الاستثمار"];
+const ERAS=[["monarchy","1921-1958","العهد الملكي (1921-1958)"],["rep1","1959-1963","الجمهورية الأولى (1958-1968)"],["rep1","1963-1991","الجمهورية الأولى (1958-1968)"],["rep2","1963-1991","حقبة (1968-2003)"],["rep2","1991-2004","حقبة (1968-2003)"],["modern","2008-now","ما بعد 2003 - 2026"]];
+const STATS=["مكتمل","قيد التنفيذ"];
+
+function sGet(k){try{return JSON.parse(localStorage.getItem(k));}catch{return null;}}
+function sSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+function flagSVG(id){
+  const m={"1921-1958":`<svg viewBox="0 0 300 180" width="100%" height="100%"><rect width="300" height="60" y="0" fill="#000"/><rect width="300" height="60" y="60" fill="#fff"/><rect width="300" height="60" y="120" fill="#007A3D"/><polygon points="0,0 105,48 105,132 0,180" fill="#CE1126"/><circle cx="42" cy="63" r="11" fill="#fff"/><circle cx="42" cy="117" r="11" fill="#fff"/></svg>`,"1959-1963":`<svg viewBox="0 0 300 180" width="100%" height="100%"><rect width="100" height="180" x="0" fill="#000"/><rect width="100" height="180" x="100" fill="#fff"/><rect width="100" height="180" x="200" fill="#007A3D"/><polygon points="150,48 159,75 186,65 170,90 192,108 164,110 150,136 136,110 108,108 130,90 114,65 141,75" fill="#CE1126"/><circle cx="150" cy="92" r="15" fill="#FCD116" stroke="#fff" stroke-width="3"/></svg>`,"1963-1991":`<svg viewBox="0 0 300 180" width="100%" height="100%"><rect width="300" height="60" y="0" fill="#CE1126"/><rect width="300" height="60" y="60" fill="#fff"/><rect width="300" height="60" y="120" fill="#000"/><text x="150" y="102" font-size="34" fill="#007A3D" text-anchor="middle">★  ★  ★</text></svg>`,"1991-2004":`<svg viewBox="0 0 300 180" width="100%" height="100%"><rect width="300" height="60" y="0" fill="#CE1126"/><rect width="300" height="60" y="60" fill="#fff"/><rect width="300" height="60" y="120" fill="#000"/><text x="150" y="102" font-size="24" fill="#007A3D" font-weight="bold" text-anchor="middle">★ الله  ★  أكبر ★</text></svg>`,"2008-now":`<svg viewBox="0 0 300 180" width="100%" height="100%"><rect width="300" height="60" y="0" fill="#CE1126"/><rect width="300" height="60" y="60" fill="#fff"/><rect width="300" height="60" y="120" fill="#000"/><text x="150" y="104" font-size="34" fill="#007A3D" font-weight="900" text-anchor="middle">الله أكبر</text></svg>`};
+  return m[id]||m["2008-now"];
+}
+const ERAS_INFO=[{id:"1921-1958",name:"المملكة العراقية (1921 - 1958)",desc:"الملك فيصل الأول، الملك غازي، والملك فيصل الثاني."},{id:"1959-1963",name:"الجمهورية الأولى (1959 - 1963)",desc:"علم عمودي بنجمة ثمانية حمراء بفترة عبد الكريم قاسم."},{id:"1963-1991",name:"علم الثلاث نجمات (1963 - 1991)",desc:"عبد السلام وعبد الرحمن عارف، أحمد حسن البكر، وصدام حسين."},{id:"1991-2004",name:"علم 1991 - 2004",desc:"أضيفت عبارة (الله أكبر) بين النجوم الثلاث بعهد صدام حسين."},{id:"2008-now",name:"العلم الحالي (2008 - الآن)",desc:"عبارة (الله أكبر) بالخط الكوفي الأخضر."}];
+
+const STARTER_RAW=[
+  [1,"برج المأمون للاتصالات",4,"1991-1994","صدام حسين (1991-1994)",6,"بغداد","حي اليرموك | بغداد | الكرخ",33.301,44.349,7,"شركات عراقية بملاكات وزارة الاتصالات","منظومة الاتصالات والبدالات والبث","تمويل محلي", "غير محدد",0,"مجمع اتصالات المأمون","الارتفاع 205 م","برج اتصالات + مطعم دوار",0,"بُني بدلاً من برج المأمون القديم المتضرر 1991."],
+  [2,"ميناء الفاو والنفق المغمور",5,"2020-2026","برهم صالح، رشيد، ونزار آميدي (2026)",1,"البصرة","رأس البيشة | الفاو | الفاو",29.974,48.463,2,"دايو (Daewoo) الكورية","التجارة العالمية وطريق التنمية","5.5-6.8 تريليون دينار","أكثر من 4.5 مليار $",4500000000,"54 كم²","النفق 2444م، عمق 19.8م","نفق 6 مسارات + 5 أرصفة",1,"افتتح النفق المغمور رسمياً 12-11-2026."],
+  [3,"سد الموصل",3,"1981-1986","صدام حسين (1981-1986)",3,"نينوى","ناحية وانا | وانا | تلكيف",36.6303,42.8231,4,"ائتلاف ألماني إيطالي","نينوى وحوض دجلة","466 مليون دينار","1.5 مليار $",1500000000,"380 كم²","3.4 كم × 113م","11.1 مليار م³ + 750 ميغاواط",0,"أكبر سد بالعراق."],
+  [4,"مجمع الفوسفات (عكاشات والقائم)",3,"1976-1983","البكر وصدام حسين",4,"الأنبار","عكاشات والقائم | القائم | القائم والرطبة",34.375,40.985,5,"سيبيترا البلجيكية","الأسمدة الفوسفاتية","340 مليون دينار","مليار $ بالتوسعات",1000000000,"منجم ومجمع صناعي","معامل + سكة 150 كم","وحدات الحامض والأسمدة",0,"عملاق التعدين بالأنبار."],
+  [5,"مشروع الثرثار وسدة سامراء",0,"1951-1956","الملك فيصل الثاني",3,"صلاح الدين","شمال غرب سامراء | سامراء | سامراء",34.198,43.848,0,"بلفور بيتي وزبلن الألمانية","حماية بغداد ودجلة","16 مليون دينار","44.8 مليون $",44800000,"65-85 مليار م³","قناة تحويل + 36 بوابة","سدة + ناظم + محطة",0,"شارك فيه 3000 عامل."],
+  [6,"جسر بعقوبة الحديدي للقطار",0,"1955-1958","الملك فيصل الثاني",0,"ديالى","بعقوبة الجديدة | بعقوبة | بعقوبة",33.748,44.635,0,"هولواي البريطانية","القطار والمركبات","417 ألف دينار","1.17 مليون $",1167600,"على نهر ديالى","مزدوج الاستخدام","سكة قطار + سيارات",0,"أُنجز عام 1958."],
+  [7,"منشآت التصنيع العسكري والحربي",5,"1978-2026","البكر وصدام (حطين والقعقاع)، صالح ورشيد (التصنيع الحربي 2022-2026)",5,"بابل، بغداد، صلاح الدين","الإسكندرية واللطيفية | المسيب | بابل",32.875,44.325,6,"كوادر عراقية وشراكات دولية","القوات المسلحة","تمويل سيادي","مشاريع دفاعية",0,"مجمعات محصنة","قاعات CNC ومسابك","100 مليون إطلاقة/سنة + مسيرات",0,"افتتح مصنع العتاد 2022."],
+  [8,"مصفى كربلاء النفطي",5,"2014-2023","طالباني، معصوم، صالح، ورشيد (2023)",7,"كربلاء","منطقة الهور | كربلاء | كربلاء",32.421,44.185,8,"هيونداي الكورية","الاكتفاء من البنزين","8 تريليون دينار","6.5 مليار $",6500000000,"6 ملايين م²","أبراج هدرجة وخزانات","30+ وحدة (140 ألف برميل/يوم)",0,"ينتج 9 ملايين لتر وقود/يوم."],
+  [9,"مطار النجف الأشرف الدولي",5,"2007-2008","جلال طالباني (2007-2008)",1,"النجف","حي الحرفيين | النجف | النجف",31.99,44.404,2,"العقيق الكويتية وبناء محلي","الفرات الأوسط والزائرون","مئات المليارات","100 مليون $",100000000,"مدرج 3000م × 45م","صالات وصول ومغادرة","طابق وطابقان",0,"افتتح تموز 2008."],
+  [10,"مصنع إطارات الديوانية",3,"1974-1977","أحمد حسن البكر (1974-1977)",4,"الديوانية","الحي الصناعي | الديوانية | الديوانية",31.972,44.918,5,"بيريلي الإيطالية وعراقيون","السوق المحلي","خطة السبعينات","غير موثق",0,"عشرات الدونمات","قاعات ومكابس حرارية","إطارات بابل والأنابيب",0,"أول مصنع إطارات بالعراق."],
+  [11,"سدة الكوت",0,"1934-1939","الملك غازي (1934-1939)",3,"واسط","حي الكرامة | الكوت | الكوت",32.4989,45.8178,4,"بلفور بيتي البريطانية","واسط وميسان وذي قار","أكثر من مليون دينار","4+ ملايين $",0,"منظومة ري","الطول 550م","56 بوابة حديدية + هويس",0,"ثاني أقدم سدة بالعراق."],
+  [12,"ملعب ميسان الأولمبي",5,"2012-2017","طالباني ومعصوم",8,"ميسان","الميمونة | العمارة | العمارة",31.838,47.121,9,"أوميك التركية","نفط ميسان والجمهور","108 مليارات دينار","92 مليون $",92000000,"ملعب أولمبي بمضمار","25,000 متفرج","طابقان مدرجات",0,"افتتح عام 2017."],
+  [13,"مطار الناصرية الدولي",5,"2021-2026","صالح، رشيد، ونزار آميدي (2026)",1,"ذي قار","قرب مدينة أور | الناصرية | الناصرية",30.94,46.092,2,"CSCEC الصينية","ذي قار والسياحة","485 مليار دينار","367 مليون $",367000000,"16 كم²","مدرج 3400م + فندق","طابقان + 6 جسور + برج 44م",0,"أحدث مطار بالجنوب."],
+  [14,"جسر السماوة المعلق",0,"1955-1958","الملك فيصل الثاني",0,"المثنى","الصوب الكبير - الصغير | السماوة | السماوة",31.32,45.288,0,"سير وليم أرول البريطانية","أهالي السماوة","450 ألف دينار","1.26 مليون $",1260000,"أول جسر معلق بالعراق","معلق بالكابلات","برجان + مساران",0,"أُنجز عام 1958."],
+  [15,"مطار كركوك الدولي",5,"2018-2022","فؤاد معصوم وبرهم صالح",1,"كركوك","طريق الحويجة | كركوك | كركوك",35.469,44.349,2,"شركة نوران التركية","كركوك وصلاح الدين","120 مليار دينار","100 مليون $",100000000,"مدرجان (~3000م)","طاقة مليون راكب/سنة","طابقان + برج",0,"افتتح تشرين الأول 2022."],
+  [16,"مطار أربيل الدولي",5,"2005-2010","جلال طالباني (2005-2010)",1,"أربيل","عنكاوا - بحركة | أربيل | أربيل",36.237,43.963,2,"شركات تركية وبريطانيون","الإقليم والشمال","640 مليار دينار","550 مليون $",550000000,"مدرج 4800م × 75م","3 ملايين مسافر/سنة","طابقان + 6 جسور",0,"افتتح 2010."],
+  [17,"سد دوكان",0,"1954-1959","فيصل الثاني وعبد الكريم قاسم",3,"السليمانية","ناحية دوكان | دوكان | دوكان",35.954,44.953,0,"بيني البريطانية","كركوك وأربيل والطاقة","14 مليون دينار","39.2 مليون $",39200000,"270 كم²","360م × 116.5م","5 وحدات (400 ميغاواط)",0,"أول سد مقوس ضخم بالعراق."],
+  [18,"ملعب دهوك الدولي",5,"2012","جلال طالباني (2012)",8,"دهوك","حي برزاني | دهوك | دهوك",36.854,42.996,9,"شركات تركية ومحلية","نادي دهوك","تمويل الإقليم","غير مفصول",0,"ملعب بمضمار","20-25 ألف متفرج","طابقان بالمقصورة",0,"معتمد للبطولات الدولية."]
+];
+
+function hydrate(r){
+  if(!Array.isArray(r))return r;
+  const e=ERAS[r[2]];
+  return{id:r[0],name:r[1],era:e[0],flag:e[1],eraLabel:e[2],years:r[3],ruler:r[4],sector:SECTORS[r[5]],gov:r[6],loc:r[7],lat:r[8],lng:r[9],parentEntity:PARENTS[r[10]],execEntity:r[11],beneficiary:r[12],costThenIQD:r[13],costThenUSD:r[14],costNowUSD:r[15]||null,area:r[16],dims:r[17],fl:r[18],status:STATS[r[19]],rateNote:r[20],summary:r[20]};
+}
+
+let projects=sGet(DB_KEY)||STARTER_RAW.map(hydrate);
+let currentEra="all",currentSector="all",mapInstance=null,markersLayer=null;
+
+function matchGov(p,g){return g==="all"||(p.gov&&p.gov.includes(g))||(p.loc&&p.loc.includes(g));}
+function renderGovPortal(){
+  document.getElementById("totalAllBadge").textContent=projects.length;
+  document.getElementById("govGrid").innerHTML=GOVS.map(([g,arch])=>{
+    const cnt=projects.filter(p=>matchGov(p,g)).length;
+    return`<div class="gov-card" onclick="enterGov('${g}')"><div class="gov-arch">✵ ${arch} ✵</div><div class="gov-body"><div class="gov-name">${g}</div><div class="gov-count">${cnt} مشروع مسجل</div></div></div>`;
+  }).join("");
+}
+function populateGovSelect(){document.getElementById("govSelect").innerHTML=`<option value="all">كل المحافظات</option>`+GOVS.map(([g])=>`<option value="${g}">${g}</option>`).join("");}
+function enterGov(gov){document.getElementById("govPortal").style.display="none";document.getElementById("mainApp").style.display="block";document.getElementById("govSelect").value=gov;switchTab("list",document.querySelectorAll(".nav-btn")[0]);renderProjects();window.scrollTo(0,0);}
+function backToPortal(){document.getElementById("mainApp").style.display="none";document.getElementById("govPortal").style.display="block";renderGovPortal();window.scrollTo(0,0);}
+function fmtIQD(u){const i=u*RATE;if(i>=1e12)return(i/1e12).toFixed(2)+" تريليون دينار";if(i>=1e9)return(i/1e9).toFixed(2)+" مليار دينار";if(i>=1e6)return(i/1e6).toFixed(1)+" مليون دينار";return i.toLocaleString()+" دينار";}
+function fmtUSD(u){if(u>=1e9)return(u/1e9).toFixed(2)+" مليار دولار";if(u>=1e6)return(u/1e6).toFixed(2)+" مليون دولار";return u.toLocaleString()+" دولار";}
+function setEra(e,b){currentEra=e;document.querySelectorAll("#eraFilters .chip").forEach(c=>c.classList.remove("active"));b.classList.add("active");renderProjects();}
+function setSector(s,b){currentSector=s;document.querySelectorAll("#sectorFilters .chip").forEach(c=>c.classList.remove("active"));b.classList.add("active");renderProjects();}
+
+function getFiltered(){
+  const q=document.getElementById("searchInput").value.trim().toLowerCase(),g=document.getElementById("govSelect").value;
+  document.getElementById("activeGovTitle").textContent=g==="all"?"📍 جميع محافظات العراق":`📍 محافظة: ${g}`;
+  return projects.filter(p=>(currentEra==="all"||p.era===currentEra)&&(currentSector==="all"||p.sector===currentSector)&&matchGov(p,g)&&(!q||`${p.name} ${p.gov} ${p.loc} ${p.ruler} ${p.execEntity} ${p.sector} ${p.years} ${p.dims} ${p.area} ${p.fl}`.toLowerCase().includes(q)));
+}
+
+function renderProjects(){
+  const list=document.getElementById("projectsList"),f=getFiltered();
+  document.getElementById("countLabel").textContent=`عرض ${f.length} صرح من أصل ${projects.length}`;
+  if(!f.length){list.innerHTML=`<div class="info-box" style="text-align:center">لا توجد صروح مطابقة لبحثك.</div>`;return;}
+  list.innerHTML=f.map(p=>`<div class="card" onclick="openProject(${p.id})"><div class="card-head"><div style="flex:1"><h3 class="card-title">${p.name}</h3><div class="card-sub"><span>🏛️ ${p.gov}</span><span>📅 ${p.years}</span><span class="badge ${p.status==="مكتمل"?"b-done":"b-prog"}">${p.status}</span></div><div class="loc-line">📍 ${p.loc}</div></div><div class="flag-box">${flagSVG(p.flag)}</div></div><div class="card-meta"><div class="meta-item"><strong>الحاكم بفترة التنفيذ</strong>${p.ruler}</div><div class="meta-item"><strong>القطاع</strong>${p.sector}</div><div class="meta-item"><strong>الأبعاد / المساحة</strong>${p.dims||p.area}</div><div class="meta-item"><strong>الطوابق / المسارات</strong>${p.fl}</div></div></div>`).join("");
+}
+
+function openProject(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  const now=p.costNowUSD?`<div><strong>بقيمة اليوم ($):</strong> ${fmtUSD(p.costNowUSD)}</div><div><strong>بقيمة اليوم (1,520 د.ع):</strong> ${fmtIQD(p.costNowUSD)}</div>`:`<div><strong>بقيمة اليوم:</strong> غير مقدرة رقمياً.</div>`;
+  document.getElementById("modalContent").innerHTML=`<button class="modal-close" onclick="closeModal()">×</button><h2 style="margin:0 0 5px;color:var(--lapis);font-size:19px">${p.name}</h2><div style="font-size:12px;color:var(--muted)">🏛️ ${p.gov} • 📅 ${p.years} • 🏷️ ${p.sector}</div><div class="project-banner"><div style="width:92px;height:56px;border-radius:6px;overflow:hidden;border:2px solid var(--gold)">${flagSVG(p.flag)}</div><div style="margin-top:8px;font-size:12px;font-weight:700">${p.eraLabel}</div></div><div class="loc-box"><h4>📍 الموقع الجغرافي والإداري الدقيق</h4><div><strong>الحي | المدينة | القضاء:</strong> ${p.loc}</div><div><strong>المحافظة:</strong> ${p.gov}</div></div><div class="specs-box"><h4>📐 المواصفات الهندسية والأبعاد</h4><div><strong>المساحة:</strong> ${p.area}</div><div><strong>الأبعاد:</strong> ${p.dims}</div><div><strong>الطوابق / المسارات / الخطوط:</strong> ${p.fl}</div></div><div class="detail-grid"><div class="detail-row"><span>👑 الحاكم بفترة التنفيذ</span><strong>${p.ruler}</strong></div><div class="detail-row"><span>🏛️ الجهة التابعة</span><strong>${p.parentEntity}</strong></div><div class="detail-row"><span>🏗️ الجهة المنفذة</span><strong>${p.execEntity}</strong></div><div class="detail-row"><span>👥 الجهة المستفيدة</span><strong>${p.beneficiary}</strong></div></div><div class="cost-box"><h4>💰 الكلفة المالية</h4><div><strong>بزمن المشروع (دينار):</strong> ${p.costThenIQD}</div><div><strong>بزمن المشروع ($):</strong> ${p.costThenUSD}</div><hr style="border:none;border-top:1px dashed var(--gold);margin:6px 0">${now}<div style="font-size:11px;color:#6e4a0c;margin-top:4px">ℹ️ ${p.rateNote}</div></div><button class="action-btn" onclick="focusOnMap(${p.lat},${p.lng})">🗺️ تحديد الموقع على الخريطة</button>`;
+  document.getElementById("modalBg").classList.add("open");
+}
+
+function closeModal(e){if(!e||e.target.id==="modalBg")document.getElementById("modalBg").classList.remove("open");}
+function switchTab(t,b){["list","map","eras"].forEach(v=>document.getElementById(v+"View").style.display=t===v?"block":"none");document.querySelectorAll(".nav-btn").forEach(x=>x.classList.remove("active"));if(b)b.classList.add("active");if(t==="map")initMap();if(t==="eras")renderEras();}
+function initMap(){if(!mapInstance){mapInstance=L.map("map").setView([33.2,44.3],6);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap"}).addTo(mapInstance);markersLayer=L.layerGroup().addTo(mapInstance);}setTimeout(()=>{mapInstance.invalidateSize();markersLayer.clearLayers();getFiltered().forEach(p=>L.marker([p.lat,p.lng]).addTo(markersLayer).bindPopup(`<b>${p.name}</b><br>${p.loc}<br><a href="#" onclick="openProject(${p.id});return false;">فتح الرقيم</a>`));},150);}
+function focusOnMap(lat,lng){closeModal();switchTab("map",document.querySelectorAll(".nav-btn")[1]);setTimeout(()=>{if(mapInstance)mapInstance.setView([lat,lng],12);},250);}
+function renderEras(){document.getElementById("erasList").innerHTML=ERAS_INFO.map(e=>`<div class="era-card"><div class="flag-box" style="width:68px;height:44px">${flagSVG(e.id)}</div><div style="flex:1"><strong style="font-size:13px;color:var(--lapis)">${e.name}</strong><p style="margin:4px 0 0;font-size:12px;color:var(--muted)">${e.desc}</p></div></div>`).join("");}
+
+async function syncAllData(){
+  let merged=new Map(STARTER_RAW.map(r=>[r[0],hydrate(r)]));
+  for(const url of DATA_BATCHES){
+    try{const res=await fetch(url+"?t="+Date.now());if(res.ok){const arr=await res.json();arr.forEach(item=>{const o=hydrate(item);merged.set(o.id,o);});}}catch{}
+  }
+  projects=[...merged.values()];
+  sSet(DB_KEY,projects);populateGovSelect();renderGovPortal();renderProjects();
+}
+populateGovSelect();renderGovPortal();syncAllData();
+</script>
+</body>
+</html>
